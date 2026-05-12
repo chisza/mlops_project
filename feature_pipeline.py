@@ -1,6 +1,6 @@
 # Imports
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import hopsworks
 import pandas as pd
@@ -202,7 +202,7 @@ def write_to_feature_store(df: pd.DataFrame) -> None:
 
 # Main
 def main():
-    end_date = datetime.now().date()
+    end_date = datetime.now(timezone.utc).date()
     start_date = end_date - timedelta(days=HISTORY_DAYS)
 
     raw_df = fetch_historical_data(str(start_date), str(end_date))

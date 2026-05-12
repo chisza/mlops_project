@@ -87,3 +87,20 @@ them to the Hopsworks Feature Store.
 ```bash
 python feature_pipeline.py
 ```
+### Step 2 — Training Pipeline
+
+Loads features from the Feature Store, trains the model, and uploads
+it to the Model Registry.
+
+```bash
+python training_pipeline.py
+```
+
+### Step 3 — Inference Pipeline
+
+Fetches live RT features, combines them with aggregated features from
+the store, and predicts whether AQI will be high.
+
+```bash
+python inference_pipeline.py
+```
