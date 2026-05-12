@@ -27,6 +27,8 @@ forecast endpoint.
 
 ## Features
 
+The following features will be used in the model:
+
 | Feature                | Type           | Description                                                 |
 |------------------------|----------------|-------------------------------------------------------------|
 | `co_rolling24h_mean`   | **Aggregated** | 24h rolling mean of CO concentration (µg/m³)                |
@@ -36,6 +38,8 @@ forecast endpoint.
 | `wind_speed`           | **RT (live)**  | Current wind speed (km/h), only known at inference time     |
 
 ### Target
+
+The following features is the target that should be predicted:
 
 | Field      | Description                                      |
 |------------|--------------------------------------------------|
@@ -73,6 +77,7 @@ Create a `.env` file in the project root:
 
 ```dotenv
 HOPSWORKS_API_KEY="<your-api-key>"
+HOPSWORKS_PROJECT_ID="<your-project-id>"
 ```
 
 ## Pipelines
@@ -104,3 +109,10 @@ the store, and predicts whether AQI will be high.
 ```bash
 python inference_pipeline.py
 ```
+
+## Reflexion & Limitations
+
+- **No scheduled runs**: Currently, the pipeline has to be triggered manually. This could be improved by creating a schedule that automatically triggers the pipelines. Suitable would be an hourly trigger, as the data granularity is hourly.
+- **Rolling feature aging**: The aggregated features are calculated and stored. The run of the inference pipeline does not trigger the feature pipeline or check for the age of the features. Depending on the time of the last run of the feature pipeline (and with it the training pipeline), the features (and the model) might be obsolete.
+- **True / false target**: The target is calculated as true / false value, not as an actual value.
+- 

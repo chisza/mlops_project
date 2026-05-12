@@ -1,12 +1,12 @@
 # Imports
 import os
+import shutil
+
 import requests
 import joblib
 import pandas as pd
-import numpy as np
 import hopsworks
 from dotenv import load_dotenv
-from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 
@@ -42,43 +42,32 @@ def fetch_live_rt_features(
     """
     print("Fetching live RT features from Open-Meteo")
 
-    today = datetime.now(timezone.utc).date()
-
     resp = requests.get(
         "https://api.open-meteo.com/v1/forecast",
         params={
             "latitude":   latitude,
             "longitude":  longitude,
-            "hourly":     [
+            "current":     [
                 "relative_humidity_2m",
                 "wind_speed_10m",
             ],
-            "start_date": str(today),
-            "end_date":   str(today),
             "timezone":   "Europe/Rome",
         },
         timeout=30,
     )
     resp.raise_for_status()
     data = resp.json()
+    print(data)
 
-    times    = data["hourly"]["time"]
-    humidity = data["hourly"]["relative_humidity_2m"]
-    wind     = data["hourly"]["wind_speed_10m"]
+    times    = data["current"]["time"]
+    humidity = data["current"]["relative_humidity_2m"]
+    wind     = data["current"]["wind_speed_10m"]
 
-    # Take the most recent non-null reading
-    rt_features = None
-    for t, h, w in zip(reversed(times), reversed(humidity), reversed(wind)):
-        if h is not None and w is not None:
-            rt_features = {
-                "timestamp":         t,
-                "relative_humidity": round(float(h), 2),
-                "wind_speed":        round(float(w), 2),
-            }
-            break
-
-    if rt_features is None:
-        raise ValueError("Could not retrieve live RT features from Open-Meteo.")
+    rt_features = {
+        "timestamp": times,
+        "relative_humidity": humidity,
+        "wind_speed": wind,
+    }
 
     print(f"Live RT features @ {rt_features['timestamp']}:")
     print(f"  relative_humidity = {rt_features['relative_humidity']} %")
@@ -122,10 +111,15 @@ def download_model(project) -> object:
         name=MODEL_NAME,
         version=MODEL_VERSION,
     )
+
+    # Remove previously downloaded model and metrics
+    if os.path.exists(MODEL_DIR):
+        shutil.rmtree(MODEL_DIR)
+
     model_dir = hw_model.download(local_path=MODEL_DIR)
     model_path = os.path.join(model_dir, "model.pkl")
     model = joblib.load(model_path)
-    print(f"  Model loaded from {model_path}")
+    print(f"Model loaded from {model_path}")
     return model
 
 
