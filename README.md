@@ -1,42 +1,89 @@
 # CAS AI Operations - MLOps Project
 
 ## Problem Statement
-Predict whether the **hourly CO concentration** at a road-level sensor station 
-in an Italian city is **above the historical median** (binary classification: 
-`high_co = 1` -> high pollution, `high_co = 0` -> normal).
+Predicts whether the **European Air Quality Index (AQI) will be high
+(≥ 50 = "Poor" or worse)** for Rome, Italy, using live data from the
+[Open-Meteo Air Quality API](https://open-meteo.com/).
 
-## Data
-The selected data is the [UCI Air Quality dataset](https://archive.ics.uci.edu/dataset/360/air+quality).
+## Data Source
 
-The dataset contains the following variables:
+| Property      | Value                                            |
+|---------------|--------------------------------------------------|
+| Provider      | [Open-Meteo](https://open-meteo.com/)            |
+| Endpoints     | Air Quality API + Historical Weather Archive API |
+| Location      | Rome, Italy (41.9028°N, 12.4964°E)               |
+| Granularity   | Hourly                                           |
+| History used  | Last 365 days                                    |
+| Auth required | None (free, no API key)                          |
+| License       | CC BY 4.0                                        |
 
-| Variable Name | Role    | Type        | Description                                                                                           | Units      | Missing Values |
-|---------------|---------|-------------|-------------------------------------------------------------------------------------------------------|------------|----------------|
-| Date          | Feature | Date        |                                                                                                       |            | no             |
-| Time          | Feature | Categorical |                                                                                                       |            | no             |
-| CO(GT)        | Feature | Integer     | True hourly averaged concentration CO in mg/m³ (reference analyzer)                                   | mg/m³      | no             |
-| PT08.S1(CO)   | Feature | Categorical | Hourly averaged sensor response (nominally CO targeted)                                               |            | no             |
-| NMHC(GT)      | Feature | Integer     | True hourly averaged overall Non Metanic HydroCarbons concentration in microg/m³ (reference analyzer) | microg/m³  | no             |
-| C6H6(GT)      | Feature | Continuous  | True hourly averaged Benzene concentration in microg/m^3 (reference analyzer)                         | microg/m^3 | no             |
-| PT08.S2(NMHC) | Feature | Categorical | Hourly averaged sensor response (nominally NMHC targeted)                                             |            | no             |
-| NOx(GT)       | Feature | Integer     | True hourly averaged NOx concentration in ppb (reference analyzer)                                    | ppb        | no             |
-| PT08.S3(NOx)  | Feature | Categorical | hourly averaged sensor response (nominally NOx targeted)                                              |            | no             |
-| NO2(GT)       | Feature | Integer     | True hourly averaged NO2 concentration in microg/m^3 (reference analyzer)                             | microg/m^3 | no             |
-| PT08.S4(NO2)  | Feature | Categorical | hourly averaged sensor response (nominally NO2 targeted)                                              |            | no             |
-| PT08.S5(O3)   | Feature | Categorical | hourly averaged sensor response (nominally O3 targeted)                                               |            | no             |
-| T             | Feature | Continous   | Temperature                                                                                           | °C         | no             |
-| RH            | Feature | Continuous  | Relative Humidity                                                                                     | %          | no             |
-| AH            | Feature | Continous   | Absolute Humidity                                                                                     |            | no             |
+**Historical vs. live split:** The feature pipeline backfills the last
+365 days of data for training. At inference time, the rolling aggregated
+features come from the Feature Store (pre-computed), while the RT
+features (humidity, wind speed) are fetched live from the Open-Meteo
+forecast endpoint.
+
+**Documentation**: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs)
 
 ## Features
-| Feature                      | Type                   | Description                                                                                   |
-|------------------------------|------------------------|-----------------------------------------------------------------------------------------------|
-| `pt08_s1_co_rolling24h_mean` | **Aggregated (Batch)** | Rolling 24-hour mean of the PT08.S1 tin-oxide CO sensor. Captures the recent pollution trend. |
-| `rh_current`                 | **Real-Time (RT)**     | Current relative humidity (%). Only known at the moment of inference.                         |
-| `temperature`                | Context                | Ambient temperature in °C                                                                     |
-| `pt08_s2_nmhc`               | Context                | NMHC sensor response                                                                          |
-| `pt08_s3_nox`                | Context                | NOx sensor response                                                                           |
-| `pt08_s4_no2`                | Context                | NO₂ sensor response                                                                           |
-| `ah`                         | Context                | Absolute humidity                                                                             |
 
-**Target:** `high_co` — 1 if CO(GT) > median(CO(GT)), else 0
+| Feature                | Type           | Description                                                 |
+|------------------------|----------------|-------------------------------------------------------------|
+| `co_rolling24h_mean`   | **Aggregated** | 24h rolling mean of CO concentration (µg/m³)                |
+| `no2_rolling24h_mean`  | **Aggregated** | 24h rolling mean of NO₂ concentration (µg/m³)               |
+| `pm25_rolling24h_mean` | **Aggregated** | 24h rolling mean of PM2.5 (µg/m³)                           |
+| `relative_humidity`    | **RT (live)**  | Current relative humidity (%), only known at inference time |
+| `wind_speed`           | **RT (live)**  | Current wind speed (km/h), only known at inference time     |
+
+### Target
+
+| Field      | Description                                      |
+|------------|--------------------------------------------------|
+| `high_aqi` | 1 if European AQI ≥ 50 ("Poor" or worse), else 0 |
+
+## Model
+
+- **Type:** Random Forest Classifier (scikit-learn)
+- **Preprocessing:** StandardScaler (in a sklearn Pipeline)
+- **Parameters:** 100 estimators, max depth 10
+- **Note:** Model performance (accuracy, F1) is not the focus of this
+  project. The goal is a functioning FTI pipeline.
+
+## Setup
+
+### Prerequisites
+
+- Python **3.13** (Hopsworks requires `< 3.14`)
+- A free [Hopsworks account](https://app.hopsworks.ai)
+- Your Hopsworks API key
+
+### Installation
+
+```bash
+git clone https://github.com/chisza/mlops_project.git
+cd mlops_project
+python -m venv .venv
+source .venv/bin/activate        
+pip install -r requirements.txt
+```
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```dotenv
+HOPSWORKS_API_KEY="<your-api-key>"
+```
+
+## Pipelines
+
+Run the pipelines in order.
+
+### Step 1 — Feature Pipeline
+
+Fetches 365 days of historical data, engineers features, and writes
+them to the Hopsworks Feature Store.
+
+```bash
+python feature_pipeline.py
+```
