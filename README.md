@@ -1,9 +1,12 @@
 # CAS AI Operations - MLOps Project
 
 ## Problem Statement
-Predicts whether the **European Air Quality Index (AQI) will be high
+In the MLOps part of the CAS AI Operation, we work on small projects. 
+This project predicts whether the **European Air Quality Index (AQI) will be high
 (≥ 50 = "Poor" or worse)** for Rome, Italy, using live data from the
 [Open-Meteo Air Quality API](https://open-meteo.com/).
+The city of Rome was arbitrarily chosen, as air quality is interesting to look at
+in places where there is high pollution.
 
 ## Data Source
 

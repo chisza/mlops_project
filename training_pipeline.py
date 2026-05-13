@@ -10,27 +10,32 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
+from configparser import ConfigParser
+
+constants = ConfigParser()
+constants.read("constants.ini")
+
 
 load_dotenv()
 
 # Constants
-FEATURE_GROUP_NAME = "air_quality_features"
-FEATURE_GROUP_VERSION = 1
-FEATURE_VIEW_NAME = "air_quality_feature_view"
-FEATURE_VIEW_VERSION = 1
-
-FEATURE_COLUMNS = [
-    "co_rolling24h_mean",
-    "no2_rolling24h_mean",
-    "pm25_rolling24h_mean",
-    "relative_humidity",
-    "wind_speed"
-]
-TARGET_COLUMN = "high_aqi"
-
-MODEL_NAME = "air_quality_classifier"
-MODEL_VERSION = 1
-MODEL_DIR = "models"
+# FEATURE_GROUP_NAME = "air_quality_features"
+# FEATURE_GROUP_VERSION = 1
+# FEATURE_VIEW_NAME = "air_quality_feature_view"
+# FEATURE_VIEW_VERSION = 1
+#
+# FEATURE_COLUMNS = [
+#     "co_rolling24h_mean",
+#     "no2_rolling24h_mean",
+#     "pm25_rolling24h_mean",
+#     "relative_humidity",
+#     "wind_speed"
+# ]
+# TARGET_COLUMN = "high_aqi"
+#
+# MODEL_NAME = "air_quality_classifier"
+# MODEL_VERSION = 1
+# MODEL_DIR = "models"
 
 # Load the feature group and create a feature view
 # To make sure that the script can be executed several times, the feature view is
