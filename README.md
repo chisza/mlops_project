@@ -94,6 +94,12 @@ HOPSWORKS_PROJECT_ID="<your-project-id>"
 
 Run the pipelines in order.
 
+### Step 0 — Make sure the venv is active
+
+```bash
+source source .venv/bin/activate    
+```
+
 ### Step 1 — Feature Pipeline
 
 Fetches 365 days of historical data, engineers features, and writes
