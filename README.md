@@ -53,7 +53,7 @@ The following features is the target that should be predicted:
 - **Type:** Random Forest Classifier (scikit-learn)
 - **Preprocessing:** StandardScaler (in a sklearn Pipeline)
 - **Parameters:** 100 estimators, max depth 10
-- **Note:** Model performance (accuracy, F1) is not the focus of this
+- **Note:** Model performance (accuracy, F1, etc.) is not the focus of this
   project. The goal is a functioning FTI pipeline.
 
 ## Setup
@@ -78,7 +78,7 @@ python3.13 -m venv .venv
 source .venv/bin/activate        
 pip install -r requirements.txt
 ```
-- If an OS is used there `python3` does not result in the use of Python 3.13, download Python 3.13 and use the above command
+- If an OS is used there `python3` does not result in the use of Python 3.13, download Python 3.13 and use the above command (the installed version has to be named accordingly)
 - If the OS automatically uses Python 3.13, `python3.13` can be replaced with `python3`
 
 ### Environment Variables
@@ -123,7 +123,8 @@ python inference_pipeline.py
 ## Reflexion & Limitations
 
 - **No scheduled runs**: Currently, the pipeline has to be triggered manually. This could be improved by creating a schedule that automatically triggers the pipelines. Suitable would be an hourly trigger, as the data granularity is hourly.
+- **Model Selection**: The model selection has not been researched in depth. Possibly there would be a more suitable model.
 - **Rolling feature aging**: The aggregated features are calculated and stored. The run of the inference pipeline does not trigger the feature pipeline or check for the age of the features. Depending on the time of the last run of the feature pipeline (and with it the training pipeline), the features (and the model) might be obsolete.
 - **True / false target**: The target is calculated as true / false value, not as an actual value.
-- **Model Version**: To allow for easy repeated code execution, the model version is increased automatically everytime the training pipeline is run. There is no quality ensurance, that only better models are registered. For productive use, this would habe to be improved.
-- **Operating System**: Trying to run the code on a Windows machine lead to problems. Containerization would solve this problem, as it would make the code independent of the operating system.
+- **Versioning**: To allow for easy repeated code execution, the model version is increased automatically everytime the training pipeline is run. There is no quality ensurance, that only better models are registered. The versions of the feature group and view are not increased at all. For productive use, this would have to be improved.
+- **Operating System**: Trying to run the code on a Windows machine can lead to problems. Containerization would solve this problem, as it would make the code independent of the operating system.
