@@ -63,6 +63,9 @@ The following features is the target that should be predicted:
 - Python **3.13** (Hopsworks requires `< 3.14`)
 - A free [Hopsworks account](https://app.hopsworks.ai)
 - Your Hopsworks API key
+- Your Hopsworks project ID
+- If in the following steps, an error appears, that `twofish` cannot be installed, try installing the Microsoft vsBuildTools
+
 
 ### Installation
 

@@ -44,6 +44,9 @@ load_dotenv()
 def get_feature_view(feature_store):
     """
     Get or create a Feature View from the air quality Feature Group.
+
+    :param feature_store: The Hopsworks feature store
+    :return: The Feature View
     """
     print("Loading Feature Group")
     feature_group = feature_store.get_feature_group(
@@ -51,16 +54,20 @@ def get_feature_view(feature_store):
         version=FEATURE_GROUP_VERSION,
     )
 
-    print("Creating / loading Feature View...")
-    # try:
+    print("Creating / loading Feature View")
+    # try: todo
     #     feature_view = feature_store.get_feature_view(
     #         name=FEATURE_VIEW_NAME,
     #         version=FEATURE_VIEW_VERSION,
     #     )
     #     print("Existing Feature View found.")
     # except Exception:
-    print("No existing Feature View found, creating new one...")
+    print("No existing Feature View found, creating new one")
+
+    # Get the Features and the target
     query = feature_group.select(FEATURE_COLUMNS + [TARGET_COLUMN])
+
+    # Create the Feature View
     feature_view = feature_store.create_feature_view(
         name=FEATURE_VIEW_NAME,
         version=FEATURE_VIEW_VERSION,
@@ -72,26 +79,38 @@ def get_feature_view(feature_store):
 
     return feature_view
 
+
 # Build training dataset from the feature view
 def get_training_data(feature_view) -> tuple[pd.DataFrame, pd.Series]:
     """
     Pull training data from the Feature View and return X, y.
+
+    :param feature_view: The Hopsworks Feature View
+    :return: A tuple of (X, y)
     """
     print("Creating training dataset from Feature View")
     X, y = feature_view.training_data(
         description="Air quality training dataset",
     )
-    print(f"  Training dataset shape: X={X.shape}, y={y.shape}")
+    print(f"Training dataset shape: X={X.shape}, y={y.shape}")
     return X, y
+
 
 # Train the model
 def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
+    """
+    Train a Random Forest classifier on the training data.
+
+    :param X: Training features
+    :param y: Training labels
+    :return: A tuple of (model, metrics)
+    """
     print("Splitting into train / test sets")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y,
-        test_size=0.2,
-        random_state=42,
-        stratify=y,
+        test_size=0.2, # Define the size of the test set
+        random_state=42, # Set a random state to make sure that results are reproducible
+        stratify=y, # Stratify the data to make sure that the test set has the same distribution as the training set (https://medium.com/@aymuosmukherjee/why-do-we-use-stratify-in-train-test-split-e3eb296a5494)
     )
     print(f"  Train: {len(X_train)} rows | Test: {len(X_test)} rows")
 
@@ -105,6 +124,8 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
             n_jobs=-1,
         )),
     ])
+
+    # Train the model
     model.fit(X_train, y_train)
 
     print("Evaluating model")
