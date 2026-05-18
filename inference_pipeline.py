@@ -106,7 +106,7 @@ def fetch_aggregated_features(fs) -> dict:
     return agg_features
 
 
-#Download Model from Registry
+# Download Model from Registry
 def download_model(project) -> object:
     """Download the latest model artifact from the Hopsworks Model Registry.
 
@@ -137,7 +137,7 @@ def download_model(project) -> object:
     return model
 
 
-# 4. Predict
+# Predict
 def predict(model, agg_features: dict, rt_features: dict) -> None:
     """
     Combine aggregated + RT features, run prediction, and print result.

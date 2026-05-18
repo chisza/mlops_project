@@ -202,7 +202,7 @@ def write_to_feature_store(df: pd.DataFrame) -> None:
 
     print(f"Inserting {len(df)} rows into feature group '{FEATURE_GROUP_NAME}'")
     fg.insert(df, write_options={"wait_for_job": True})
-    print("  Done.")
+    print("Done.")
 
 
 # Main

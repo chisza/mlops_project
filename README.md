@@ -1,7 +1,7 @@
 # CAS AI Operations - MLOps Project
 
 ## Problem Statement
-In the MLOps part of the CAS AI Operation, we work on small projects. 
+In the MLOps part of the CAS AI Operation, we are tasked to create a small project.
 This project predicts whether the **European Air Quality Index (AQI) will be high
 (≥ 50 = "Poor" or worse)** for Rome, Italy, using live data from the
 [Open-Meteo Air Quality API](https://open-meteo.com/).
@@ -32,13 +32,13 @@ forecast endpoint.
 
 The following features will be used in the model:
 
-| Feature                | Type           | Description                                                 |
-|------------------------|----------------|-------------------------------------------------------------|
-| `co_rolling24h_mean`   | **Aggregated** | 24h rolling mean of CO concentration (µg/m³)                |
-| `no2_rolling24h_mean`  | **Aggregated** | 24h rolling mean of NO₂ concentration (µg/m³)               |
-| `pm25_rolling24h_mean` | **Aggregated** | 24h rolling mean of PM2.5 (µg/m³)                           |
-| `relative_humidity`    | **RT (live)**  | Current relative humidity (%), only known at inference time |
-| `wind_speed`           | **RT (live)**  | Current wind speed (km/h), only known at inference time     |
+| Feature                | Type           | Description                                                |
+|------------------------|----------------|------------------------------------------------------------|
+| `co_rolling24h_mean`   | **Aggregated** | 24h rolling mean of CO concentration (µg/m³)               |
+| `no2_rolling24h_mean`  | **Aggregated** | 24h rolling mean of NO₂ concentration (µg/m³)              |
+| `pm25_rolling24h_mean` | **Aggregated** | 24h rolling mean of PM2.5 (µg/m³)                          |
+| `relative_humidity`    | **RT (live)**  | Current relative humidity (%), retrieved at inference time |
+| `wind_speed`           | **RT (live)**  | Current wind speed (km/h), retrieved at inference time     |
 
 ### Target
 
@@ -63,6 +63,10 @@ The following features is the target that should be predicted:
 - Python **3.13** (Hopsworks requires `< 3.14`)
 - A free [Hopsworks account](https://app.hopsworks.ai)
 - Your Hopsworks API key
+
+#### Development Environment
+- EndeavourOS (Titan)
+- **Caution**: The code has not been tested on different operating systems.
 
 ### Installation
 
@@ -118,4 +122,5 @@ python inference_pipeline.py
 - **No scheduled runs**: Currently, the pipeline has to be triggered manually. This could be improved by creating a schedule that automatically triggers the pipelines. Suitable would be an hourly trigger, as the data granularity is hourly.
 - **Rolling feature aging**: The aggregated features are calculated and stored. The run of the inference pipeline does not trigger the feature pipeline or check for the age of the features. Depending on the time of the last run of the feature pipeline (and with it the training pipeline), the features (and the model) might be obsolete.
 - **True / false target**: The target is calculated as true / false value, not as an actual value.
+- **Model Version**: To allow for easy repeated code execution, the model version is increased automatically everytime the training pipeline is run. There is no quality ensurance, that only better models are registered. For productive use, this would habe to be improved.
 - **Operating System**: Trying to run the code on a Windows machine lead to problems. Containerization would solve this problem, as it would make the code independent of the operating system.
