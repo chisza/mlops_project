@@ -118,4 +118,4 @@ python inference_pipeline.py
 - **No scheduled runs**: Currently, the pipeline has to be triggered manually. This could be improved by creating a schedule that automatically triggers the pipelines. Suitable would be an hourly trigger, as the data granularity is hourly.
 - **Rolling feature aging**: The aggregated features are calculated and stored. The run of the inference pipeline does not trigger the feature pipeline or check for the age of the features. Depending on the time of the last run of the feature pipeline (and with it the training pipeline), the features (and the model) might be obsolete.
 - **True / false target**: The target is calculated as true / false value, not as an actual value.
-- 
+- **Operating System**: Trying to run the code on a Windows machine lead to problems. Containerization would solve this problem, as it would make the code independent of the operating system.

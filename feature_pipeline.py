@@ -37,6 +37,7 @@ def fetch_historical_data(
 ) -> pd.DataFrame:
     """
     Fetch historical data from Air Quality API
+
     :param start_date: The start date of the historical data
     :param end_date: The end date of the historical data
     :param latitude: The latitude of the location, defaults to latitude constant set
@@ -52,7 +53,7 @@ def fetch_historical_data(
             "latitude": latitude,
             "longitude": longitude,
             "hourly": [
-                "carbon_monoxide",  # TODO make this parameters of the function
+                "carbon_monoxide",
                 "nitrogen_dioxide",
                 "pm2_5",
                 "european_aqi",
@@ -114,7 +115,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     print("Cleaning data")
     df = df.copy()
-    df = df.dropna(subset=["european_aqi", "carbon_monoxide"])  # TODO all nas should be dropped
+    df = df.dropna(subset=["european_aqi", "carbon_monoxide"])
     df = df.sort_values("datetime").reset_index(drop=True)
     print(f"Rows after cleaning: {len(df)}")
     return df
@@ -123,7 +124,10 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 # Engineer features
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
+    Engineer the aggregated features
 
+    :param df: dataframe with the data
+    :return: dataframe with the cleaned data
     """
     print("Engineering features...")
     df = df.copy()
@@ -146,7 +150,7 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df["high_aqi"] = (df["european_aqi"] >= 50).astype(int)
 
     # Round RT features
-    df["relative_humidity"] = df["relative_humidity"].round(2)  # TODO is this really necessary?
+    df["relative_humidity"] = df["relative_humidity"].round(2)
     df["wind_speed"] = df["wind_speed"].round(2)
 
     # Drop rows where rolling features are still NaN
@@ -167,21 +171,22 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         "high_aqi",
     ]].rename(columns={"datetime": "event_time"})
 
-    # TODO add a check to make sure there are no nans left
-
     print(f"  Rows after feature engineering: {len(df)}")
     return df
 
 
 # Add the dataframe to Hopswork
-
 def write_to_feature_store(df: pd.DataFrame) -> None:
-    """Connect to Hopsworks and upsert data into the Feature Group."""
+    """Connect to Hopsworks and upsert data into the Feature Group.
+
+    :param df: dataframe with the data
+    """
     print("Connecting to Hopsworks")
     project = hopsworks.login(api_key_value=os.environ["HOPSWORKS_API_KEY"],
                               project=os.environ["HOPSWORKS_PROJECT_ID"])
     fs = project.get_feature_store()
 
+    # Create a feature group or get the existing feature group
     fg = fs.get_or_create_feature_group(
         name=FEATURE_GROUP_NAME,
         version=FEATURE_GROUP_VERSION,
