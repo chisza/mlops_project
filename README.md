@@ -63,6 +63,7 @@ The following features is the target that should be predicted:
 - Python **3.13** (Hopsworks requires `< 3.14`)
 - A free [Hopsworks account](https://app.hopsworks.ai)
 - Your Hopsworks API key
+- Hopsworks Project created
 
 #### Development Environment
 - Operating System: EndeavourOS (Titan)
