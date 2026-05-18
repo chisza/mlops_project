@@ -65,7 +65,8 @@ The following features is the target that should be predicted:
 - Your Hopsworks API key
 
 #### Development Environment
-- EndeavourOS (Titan)
+- Operating System: EndeavourOS (Titan)
+- Exact Python Version: 3.13.13
 - **Caution**: The code has not been tested on different operating systems.
 
 ### Installation
