@@ -74,10 +74,12 @@ The following features is the target that should be predicted:
 ```bash
 git clone https://github.com/chisza/mlops_project.git
 cd mlops_project
-python -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate        
 pip install -r requirements.txt
 ```
+- If an OS is used there `python3` does not result in the use of Python 3.13, download Python 3.13 and use the above command
+- If the OS automatically uses Python 3.13, `python3.13` can be replaced with `python3`
 
 ### Environment Variables
 
