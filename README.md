@@ -69,12 +69,10 @@ The following feature is the target that should be predicted:
 - Exact Python Version: 3.13.13
 
 #### Other Tested Environments
-- Windows 11
-  - With Python 3.13
-  - Required the installation of VS Code (for C++)
 - Ubuntu 24.04
   - With Python 3.12.3
   - Required the installation of `build-essential`
+- If Windows should be used, VS Code seems to be necessary (this has not been tested)
 
 ### Installation
 
