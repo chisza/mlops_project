@@ -19,7 +19,6 @@ FEATURE_GROUP_VERSION = 1
 FEATURE_VIEW_NAME     = "air_quality_feature_view"
 FEATURE_VIEW_VERSION  = 1
 MODEL_NAME            = "air_quality_classifier"
-MODEL_VERSION         = 1
 MODEL_DIR             = "downloaded_model"
 
 FEATURE_COLUMNS = [
@@ -39,6 +38,10 @@ def fetch_live_rt_features(
     Fetch the most recent hourly relative_humidity and wind_speed
     from the Open-Meteo forecast endpoint (the current hour is the
     RT feature — it is only known at inference time).
+
+    :param latitude: Latitude of the location
+    :param longitude: Longitude of the location
+    :return: Dictionary of hourly relative humidity and wind speed
     """
     print("Fetching live RT features from Open-Meteo")
 
@@ -76,11 +79,13 @@ def fetch_live_rt_features(
 
 
 # Load the aggregated features
-
 def fetch_aggregated_features(fs) -> dict:
     """
     Retrieve the most recently stored aggregated features (rolling 24h
     means) from the Hopsworks Feature Store via the Feature View.
+
+    :param fs: Feature Store
+    :return: Dictionary of aggregated features
     """
     print("Loading aggregated features from Hopsworks Feature Store")
 
@@ -96,21 +101,30 @@ def fetch_aggregated_features(fs) -> dict:
 
     print("  Aggregated features loaded:")
     for k, v in agg_features.items():
-        print(f"    {k} = {v}")
+        print(f"{k} = {v}")
 
     return agg_features
 
 
-# ── 3. Download Model from Registry ──────────────────────────────────────────
-
+# Download Model from Registry
 def download_model(project) -> object:
-    """Download the latest model artifact from the Hopsworks Model Registry."""
+    """Download the latest model artifact from the Hopsworks Model Registry.
+
+    :param project: Hopsworks Project
+    :return: Hopsworks Model Artifact
+    """
     print("Downloading model from Hopsworks Model Registry")
     mr = project.get_model_registry()
-    hw_model = mr.get_model(
+    # Get all the models with the correct name
+    hw_models = mr.get_models(
         name=MODEL_NAME,
-        version=MODEL_VERSION,
     )
+
+    # Select the latest model
+    model_version = 0
+    for model in hw_models:
+        if model.version > model_version:
+            hw_model = model
 
     # Remove previously downloaded model and metrics
     if os.path.exists(MODEL_DIR):
@@ -123,11 +137,14 @@ def download_model(project) -> object:
     return model
 
 
-# ── 4. Predict ────────────────────────────────────────────────────────────────
-
+# Predict
 def predict(model, agg_features: dict, rt_features: dict) -> None:
     """
     Combine aggregated + RT features, run prediction, and print result.
+
+    :param model: model that should be used for prediction (loaded from Hopsworks Model Registry)
+    :param agg_features: aggregated features
+    :param rt_features: RT features
     """
     input_row = {
         "co_rolling24h_mean":   agg_features["co_rolling24h_mean"],
@@ -157,24 +174,23 @@ def predict(model, agg_features: dict, rt_features: dict) -> None:
     print("="*50)
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
-
+# Main
 def main():
-    # Step 1: Fetch live RT features (current conditions, only known now)
+    # Fetch live RT features (current conditions, only known now)
     rt_features = fetch_live_rt_features()
 
-    # Step 2: Connect to Hopsworks
+    # Connect to Hopsworks
     print("\nConnecting to Hopsworks")
     project = hopsworks.login(api_key_value=os.environ["HOPSWORKS_API_KEY"])
     fs = project.get_feature_store()
 
-    # Step 3: Load aggregated features from Feature Store
+    # Load aggregated features from Feature Store
     agg_features = fetch_aggregated_features(fs)
 
-    # Step 4: Download model from registry
+    # Download model from registry
     model = download_model(project)
 
-    # Step 5: Predict
+    # Predict
     predict(model, agg_features, rt_features)
 
 
