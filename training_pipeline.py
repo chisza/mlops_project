@@ -48,7 +48,7 @@ def get_feature_view(feature_store):
         version=FEATURE_GROUP_VERSION,
     )
 
-    print("Creating / loading Feature View...")
+    print("Creating / loading Feature View")
     try:
         # Use try-except block to ensure that the code can be executed repeatedly
         query = feature_group.select(FEATURE_COLUMNS + [TARGET_COLUMN])

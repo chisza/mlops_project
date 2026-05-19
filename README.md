@@ -22,9 +22,8 @@ in places where there is high pollution.
 
 **Historical vs. live split:** The feature pipeline backfills the last
 365 days of data for training. At inference time, the rolling aggregated
-features come from the Feature Store (pre-computed), while the RT
-features (humidity, wind speed) are fetched live from the Open-Meteo
-forecast endpoint.
+features come from the Feature Store, while the RT
+features are fetched live from the Open-Meteo forecast endpoint.
 
 **Documentation**: [https://open-meteo.com/en/docs](https://open-meteo.com/en/docs)
 
@@ -42,7 +41,7 @@ The following features will be used in the model:
 
 ### Target
 
-The following features is the target that should be predicted:
+The following feature is the target that should be predicted:
 
 | Field      | Description                                      |
 |------------|--------------------------------------------------|
@@ -68,7 +67,14 @@ The following features is the target that should be predicted:
 #### Development Environment
 - Operating System: EndeavourOS (Titan)
 - Exact Python Version: 3.13.13
-- **Caution**: The code has not been tested on different operating systems.
+
+#### Other Tested Environments
+- Windows 11
+  - With Python 3.13
+  - Required the installation of VS Code (for C++)
+- Ubuntu 24.04
+  - With Python 3.12.3
+  - Required the installation of `build-essential`
 
 ### Installation
 
@@ -88,7 +94,7 @@ Create a `.env` file in the project root:
 
 ```dotenv
 HOPSWORKS_API_KEY="<your-api-key>"
-HOPSWORKS_PROJECT_ID="<your-project-id>"
+HOPSWORKS_PROJECT_ID="<your-project-name>"
 ```
 
 ## Pipelines
@@ -130,8 +136,8 @@ python inference_pipeline.py
 ## Reflexion & Limitations
 
 - **No scheduled runs**: Currently, the pipeline has to be triggered manually. This could be improved by creating a schedule that automatically triggers the pipelines. Suitable would be an hourly trigger, as the data granularity is hourly.
-- **Model Selection**: The model selection has not been researched in depth. Possibly there would be a more suitable model.
+- **Model Selection**: The model selection has not been researched in depth. Repeated execution of the training pipeline shows a very accurate model. This accuracy should be verified.
 - **Rolling feature aging**: The aggregated features are calculated and stored. The run of the inference pipeline does not trigger the feature pipeline or check for the age of the features. Depending on the time of the last run of the feature pipeline (and with it the training pipeline), the features (and the model) might be obsolete.
 - **True / false target**: The target is calculated as true / false value, not as an actual value.
-- **Versioning**: To allow for easy repeated code execution, the model version is increased automatically everytime the training pipeline is run. There is no quality ensurance, that only better models are registered. The versions of the feature group and view are not increased at all. For productive use, this would have to be improved.
-- **Operating System**: Trying to run the code on a Windows machine can lead to problems. Containerization would solve this problem, as it would make the code independent of the operating system.
+- **Versioning**: To allow for easy repeated code execution, the model version is increased automatically everytime the training pipeline is run. There is no quality ensurance, so that only better models would be registered. The versions of the feature group and view are not increased at all. For productive use, this would have to be improved.
+- **Operating System**: Currently, the success of the pipelines depends on the proper preparation of the operating system with all the necessary packages, which can result in errors. Containerization would solve this problem, as it would make the code independent of the operating system.

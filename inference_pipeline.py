@@ -72,7 +72,7 @@ def fetch_live_rt_features(
         "wind_speed": wind,
     }
 
-    print(f"Live RT features @ {rt_features['timestamp']}:")
+    print(f"Live RT features at {rt_features['timestamp']}:")
     print(f"  relative_humidity = {rt_features['relative_humidity']} %")
     print(f"  wind_speed        = {rt_features['wind_speed']} km/h")
     return rt_features
@@ -169,7 +169,7 @@ def predict(model, agg_features: dict, rt_features: dict) -> None:
     for col in FEATURE_COLUMNS:
         print(f"  {col:<26} = {input_row[col]}")
     print()
-    print(f"Prediction     : {'⚠️  HIGH AQI (>= 50)' if prediction == 1 else '✅  NORMAL AQI (< 50)'}")
+    print(f"Prediction     : {'HIGH AQI (>= 50)' if prediction == 1 else 'NORMAL AQI (< 50)'}")
     print(f"Probability    : P(normal)={probability[0]:.3f}  P(high)={probability[1]:.3f}")
     print("="*50)
 

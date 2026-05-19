@@ -108,7 +108,8 @@ def fetch_historical_data(
 
 # Clean the data set
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Drop rows with missing target or key sensor values.
+    """
+    Drop rows with missing target or key sensor values.
 
     :param df: dataframe with the data
     :return: dataframe with the cleaned data
@@ -129,11 +130,12 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     :param df: dataframe with the data
     :return: dataframe with the cleaned data
     """
-    print("Engineering features...")
+    print("Engineering features")
     df = df.copy()
 
     # Rolling 24h means (aggregated / batch features)
     # Add the new features to the dataset
+    # https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rolling.html
     for col, new_col in [
         ("carbon_monoxide", "co_rolling24h_mean"),
         ("nitrogen_dioxide", "no2_rolling24h_mean"),
@@ -153,10 +155,10 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df["relative_humidity"] = df["relative_humidity"].round(2)
     df["wind_speed"] = df["wind_speed"].round(2)
 
-    # Drop rows where rolling features are still NaN
+    # Drop rows where rolling features are still NaN (key sensor value)
     df = df.dropna(subset=["co_rolling24h_mean"])
 
-    # Create a unique row id from the timestamp
+    # Create a unique row id from the timestamp -> primary key
     df["row_id"] = df["datetime"].dt.strftime("%Y%m%d%H").astype(int)
 
     # Keep only the columns we need
@@ -197,11 +199,11 @@ def write_to_feature_store(df: pd.DataFrame) -> None:
             "Includes 24h rolling means (aggregated) and current "
             "humidity/wind (RT features)."
         ),
-        online_enabled=True,
+        online_enabled=True, # https://docs.hopsworks.ai/feature-store-api/3.0/generated/api/feature_group_api/
     )
 
     print(f"Inserting {len(df)} rows into feature group '{FEATURE_GROUP_NAME}'")
-    fg.insert(df, write_options={"wait_for_job": True})
+    fg.insert(df, write_options={"wait_for_job": True}) # make sure the job is finished before returning
     print("Done.")
 
 
